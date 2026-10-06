@@ -196,6 +196,10 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v5
 
+      # 仓库内 wrapper 走国内镜像，CI 环境切回官方发行地址
+      - name: Point Gradle wrapper at official distribution
+        run: sed -i 's|mirrors.aliyun.com/gradle/distributions/v[0-9.]*/gradle|services.gradle.org/distributions/gradle|' gradle/wrapper/gradle-wrapper.properties
+
       # Download freshly built natives (if any were built)
       - name: Download built native libraries
         if: needs.check-natives.outputs.needs_build == 'true'
