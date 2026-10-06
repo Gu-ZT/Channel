@@ -9,7 +9,7 @@ import cn.ussshenzhou.t88.gui.screen.TScreen;
 import cn.ussshenzhou.t88.gui.util.LayoutHelper;
 import cn.ussshenzhou.t88.gui.widegt.TLabel;
 import cn.ussshenzhou.t88.gui.widegt.TSlider;
-import cn.ussshenzhou.t88.network.NetworkHelper;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -99,7 +99,7 @@ public class ItemChannelSettingScreen extends TScreen {
         if (updated) {
             var s = channelEditBox.getValue();
             if (channelEditBox.check(s)) {
-                NetworkHelper.sendToServer(new SetItemChannelPacket(hand, getEditBoxValue()));
+                ClientPacketDistributor.sendToServer(new SetItemChannelPacket(hand, getEditBoxValue()));
             }
             updated = false;
         }

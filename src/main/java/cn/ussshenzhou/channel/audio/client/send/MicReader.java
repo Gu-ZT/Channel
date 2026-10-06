@@ -11,7 +11,7 @@ import cn.ussshenzhou.channel.util.AudioHelper;
 import cn.ussshenzhou.channel.util.CompatHelper;
 import cn.ussshenzhou.channel.util.ModConstant;
 import cn.ussshenzhou.channel.audio.OpusManager;
-import cn.ussshenzhou.t88.network.NetworkHelper;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
@@ -101,7 +101,7 @@ public class MicReader {
             if (SubspaceConnection.using()) {
                 SubspaceConnection.send(packet);
             } else {
-                NetworkHelper.sendToServer(packet);
+                ClientPacketDistributor.sendToServer(packet);
             }
             MicrophoneHud.setStatus(MicrophoneHud.Status.TALKING);
         } catch (Throwable t) {

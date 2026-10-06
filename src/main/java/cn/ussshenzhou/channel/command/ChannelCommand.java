@@ -4,7 +4,6 @@ import cn.ussshenzhou.channel.audio.server.RelayHandler;
 import cn.ussshenzhou.channel.config.ChannelServerConfig;
 import cn.ussshenzhou.channel.network.OpMutePacket;
 import cn.ussshenzhou.channel.subspace.server.SubspaceConnection;
-import cn.ussshenzhou.t88.network.NetworkHelper;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
@@ -15,6 +14,7 @@ import net.minecraft.server.permissions.Permissions;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 @EventBusSubscriber
 public class ChannelCommand {
@@ -30,7 +30,7 @@ public class ChannelCommand {
                                                     var now = ChannelServerConfig.get().muteNoneOP;
                                                     ChannelServerConfig.write(c -> c.muteNoneOP = !now);
                                                     ct.getSource().sendSystemMessage(Component.literal(now ? "All players can talk now." : "Only OP 2 can talk now."));
-                                                    NetworkHelper.sendToAllPlayers(new OpMutePacket(!now));
+                                                    PacketDistributor.sendToAllPlayers(new OpMutePacket(!now));
                                                     return Command.SINGLE_SUCCESS;
                                                 })
                                         )
@@ -59,7 +59,7 @@ public class ChannelCommand {
     public static void playerLogIn(PlayerEvent.PlayerLoggedInEvent event) {
         var mute = ChannelServerConfig.get().muteNoneOP;
         if (mute && event.getEntity() instanceof ServerPlayer player) {
-            NetworkHelper.sendToPlayer(player, new OpMutePacket(mute));
+            PacketDistributor.sendToPlayer(player, new OpMutePacket(mute));
         }
     }
 }

@@ -7,7 +7,6 @@ import cn.ussshenzhou.channel.blockentity.MicBlockEntity;
 import cn.ussshenzhou.channel.blockentity.SpeakerBlockEntity;
 import cn.ussshenzhou.channel.config.ChannelServerConfig;
 import cn.ussshenzhou.channel.network.AudioPacket2C;
-import cn.ussshenzhou.t88.network.NetworkHelper;
 import com.google.common.collect.MapMaker;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mojang.logging.LogUtils;
@@ -23,6 +22,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -176,7 +176,7 @@ public class RelayHandler {
                 }
             }
         }
-        tos.forEach(to -> NetworkHelper.sendToPlayer(to, new AudioPacket2C(from.getUUID(), opusAudio, channels)));
+        tos.forEach(to -> PacketDistributor.sendToPlayer(to, new AudioPacket2C(from.getUUID(), opusAudio, channels)));
     }
 
     public static boolean closeHear(ServerPlayer from, ServerPlayer to) {

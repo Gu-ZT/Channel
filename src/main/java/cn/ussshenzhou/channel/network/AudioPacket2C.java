@@ -2,12 +2,11 @@ package cn.ussshenzhou.channel.network;
 
 import cn.ussshenzhou.channel.audio.client.receive.AudioReceiveHandler;
 import cn.ussshenzhou.channel.util.ModConstant;
-import cn.ussshenzhou.t88.network.annotation.ClientHandler;
-import cn.ussshenzhou.t88.network.annotation.Decoder;
-import cn.ussshenzhou.t88.network.annotation.Encoder;
-import cn.ussshenzhou.t88.network.annotation.NetPacket;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import javax.annotation.Nullable;
@@ -16,8 +15,10 @@ import java.util.UUID;
 /**
  * @author USS_Shenzhou
  */
-@NetPacket(modid = ModConstant.SHORT_ID, handleOnNetwork = true, id = "au")
-public class AudioPacket2C {
+public class AudioPacket2C implements CustomPacketPayload {
+    public static final Type<AudioPacket2C> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ModConstant.SHORT_ID, "au"));
+    public static final StreamCodec<FriendlyByteBuf, AudioPacket2C> CODEC = StreamCodec.ofMember(AudioPacket2C::encode, AudioPacket2C::new);
+
     public final UUID from;
     public final byte[] opus;
     public final int[] channels;
@@ -32,7 +33,6 @@ public class AudioPacket2C {
         }
     }
 
-    @Decoder
     public AudioPacket2C(FriendlyByteBuf buf) {
         this.from = buf.readUUID();
         this.opus = buf.readByteArray();
@@ -43,7 +43,11 @@ public class AudioPacket2C {
         }
     }
 
-    @Encoder
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
+
     public void encode(FriendlyByteBuf buf) {
         buf.writeUUID(this.from);
         buf.writeByteArray(this.opus);
@@ -53,7 +57,6 @@ public class AudioPacket2C {
         }
     }
 
-    @ClientHandler
     public void clientHandler(IPayloadContext context) {
         AudioReceiveHandler.handle(this);
     }

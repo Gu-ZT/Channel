@@ -7,7 +7,6 @@ import cn.ussshenzhou.channel.subspace.SubspacePacket;
 import cn.ussshenzhou.channel.subspace.server.send.DataUpdatePacket;
 import cn.ussshenzhou.channel.subspace.server.send.InitPacket;
 import cn.ussshenzhou.channel.subspace.server.send.PlayerLoginPacket;
-import cn.ussshenzhou.t88.network.NetworkHelper;
 import com.mojang.logging.LogUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -20,6 +19,7 @@ import net.minecraft.network.Varint21FrameDecoder;
 import net.minecraft.network.Varint21LengthFieldPrepender;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import java.security.SecureRandom;
@@ -127,7 +127,7 @@ public class SubspaceConnection {
         SubspaceConnection.send(new PlayerLoginPacket(token, player.getUUID(), player.getId()));
         SubspaceConnection.send(new DataUpdatePacket());
         var cfg = ChannelServerConfig.get();
-        eventLoopGroup.schedule(() -> NetworkHelper.sendToPlayer((ServerPlayer) player, new SubspaceInitPacket(token, cfg.subspaceProtocol, cfg.subspaceAddress, cfg.subspaceClientPort, cfg.subspaceSecurityLevel)), 3, TimeUnit.SECONDS);
+        eventLoopGroup.schedule(() -> PacketDistributor.sendToPlayer((ServerPlayer) player, new SubspaceInitPacket(token, cfg.subspaceProtocol, cfg.subspaceAddress, cfg.subspaceClientPort, cfg.subspaceSecurityLevel)), 3, TimeUnit.SECONDS);
     }
 
     public static boolean using() {
