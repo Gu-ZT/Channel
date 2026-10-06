@@ -8,7 +8,8 @@
     "AbstractContainerWidgetMixin",
     "AbstractWidgetMixin",
     "GameRendererMixin",
-    "MinecraftMixin"
+    "MinecraftMixin",
+    "MutableComponentAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
