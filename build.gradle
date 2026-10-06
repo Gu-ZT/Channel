@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'idea'
-    id 'net.neoforged.moddev' version '2.0.147'
+    id 'net.fabricmc.fabric-loom' version '1.18-SNAPSHOT'
 }
 
 version = mod_version
@@ -21,79 +21,24 @@ base {
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
-sourceSets {
-    main {
-        java.srcDir 'src/main/java'
-    }
-}
-
 tasks.named('compileJava', JavaCompile) {
     options.compilerArgs += [
             '--enable-preview'
     ]
 }
 
-neoForge {
-    version = project.neo_version
-
-    parchment {
-        mappingsVersion = project.parchment_mappings_version
-        minecraftVersion = project.parchment_minecraft_version
-    }
+loom {
+    accessWidenerPath = file("src/main/resources/channel.accesswidener")
 
     runs {
         client {
             client()
-
-            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            ideConfigGenerated(true)
         }
-
         server {
             server()
-            programArgument '--nogui'
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-        }
-
-        // This run config launches GameTestServer and runs all registered gametests, then exits.
-        // By default, the server will crash when no gametests are provided.
-        // The gametest system is also enabled by default for other run configs under the /test command.
-        gameTestServer {
-            type = "gameTestServer"
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-        }
-
-        data {
-            clientData()
-
-            // example of overriding the workingDirectory set in configureEach above, uncomment if you want to use it
-            // gameDirectory = project.file('run-data')
-
-            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
-        }
-
-        // applies to all the run configs above
-        configureEach {
-            // Recommended logging data for a userdev environment
-            // The markers can be added/remove as needed separated by commas.
-            // "SCAN": For mods scan.
-            // "REGISTRIES": For firing of registry events.
-            // "REGISTRYDUMP": For getting the contents of all registries.
-            systemProperty 'forge.logging.markers', 'REGISTRIES'
-
-            //jvmArguments.addAll '--enable-preview'
-
-            // Recommended logging level for the console
-            // You can set various levels here.
-            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
-            logLevel = org.slf4j.event.Level.DEBUG
-        }
-    }
-
-    mods {
-        "${mod_id}" {
-            sourceSet(sourceSets.main)
+            programArg '--nogui'
+            ideConfigGenerated(true)
         }
     }
 }
@@ -101,44 +46,24 @@ neoForge {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
-    // Example mod dependency with JEI
-    // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
-    // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
-    // compileOnly "mezz.jei:jei-${mc_version}-forge-api:${jei_version}"
-    // runtimeOnly "mezz.jei:jei-${mc_version}-forge:${jei_version}"
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    // MC 26.x 起官方不再发布混淆映射（运行时即 Mojang 名），无需 mappings；
+    // 因无重映射环节，模组依赖直接走 implementation，Fabric 官方模板同款
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    implementation include("io.github.llamalad7:mixinextras-fabric:0.5.5")
 
     implementation 'io.github.jaredmdobson:concentus:1.0.2'
-    jarJar 'io.github.jaredmdobson:concentus:1.0.2'
-
-    //implementation(group: "dev.onvoid.webrtc", name: "webrtc-java", version: "0.14.0")
-    //jarJar(group: "dev.onvoid.webrtc", name: "webrtc-java", version: "0.14.0")
-
-    //implementation group: "dev.onvoid.webrtc", name: "webrtc-java", version: "0.14.0", classifier: "windows-x86_64"
-    //jarJar(group: "dev.onvoid.webrtc", name: "webrtc-java", version: "0.14.0", classifier: "windows-x86_64")
-    // Example mod dependency using a mod jar from ./libs with a flat dir repository
-    // This maps to ./libs/coolmod-${mc_version}-${coolmod_version}.jar
-    // The group id is ignored when searching -- in this case, it is "blank"
-    // implementation "blank:coolmod-${mc_version}:${coolmod_version}"
-
-    // Example mod dependency using a file as dependency
-    // implementation files("libs/coolmod-${mc_version}-${coolmod_version}.jar")
-
-    // Example project dependency using a sister or child project:
-    // implementation project(":myproject")
-
-    // For more info:
-    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
-    // http://www.gradle.org/docs/current/userguide/dependency_management.html
+    include 'io.github.jaredmdobson:concentus:1.0.2'
 }
 
-// This block of code expands all declared replace properties in the specified resource targets.
-// A missing property will result in an error. Properties are expanded using ${} Groovy notation.
-var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
+// 展开 fabric.mod.json 中的 ${} 属性占位符
+tasks.named('processResources', ProcessResources) {
     var replaceProperties = [minecraft_version      : minecraft_version,
                              minecraft_version_range: minecraft_version_range,
-                             neo_version            : neo_version,
-                             neo_version_range      : neo_version_range,
-                             loader_version_range   : loader_version_range,
+                             loader_version         : loader_version,
+                             fabric_version         : fabric_version,
                              mod_id                 : mod_id,
                              mod_name               : mod_name,
                              mod_license            : mod_license,
@@ -146,16 +71,10 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
                              mod_authors            : mod_authors,
                              mod_description        : mod_description]
     inputs.properties replaceProperties
-    expand replaceProperties
-    from "src/main/templates"
-    into "build/generated/sources/modMetadata"
+    filesMatching('fabric.mod.json') {
+        expand replaceProperties
+    }
 }
-
-// Include the output of "generateModMetadata" as an input directory for the build
-// this works with both building through Gradle and the IDE.
-sourceSets.main.resources.srcDir generateModMetadata
-// To avoid having to run "generateModMetadata" manually, make it run on every project reload
-neoForge.ideSyncTask generateModMetadata
 
 // Example configuration to allow publishing using the maven-publish plugin
 publishing {
@@ -230,7 +149,6 @@ abstract class StripPreviewMinorTask extends DefaultTask {
                         int major = ((b[6] & 0xFF) << 8) | (b[7] & 0xFF)
                         if (major >= 56 && minor == 0xFFFF) {
                             b[4] = 0; b[5] = 0
-                            f.bytes = b
                             println("striped preview minor version: " + f.name)
                         }
                     }
@@ -247,141 +165,6 @@ tasks.register('stripPreviewMinor', StripPreviewMinorTask) {
 
 tasks.named('classes') {
     finalizedBy tasks.named('stripPreviewMinor')
-}
-
-
-import groovy.json.JsonBuilder
-import groovy.json.JsonSlurper
-
-import java.nio.file.FileSystems
-import java.nio.file.Files
-import java.nio.file.Path
-
-abstract class RemoveWebRTCLibJarjarMetadata extends DefaultTask {
-
-    @InputFile
-    abstract RegularFileProperty getTargetJar()
-
-    @TaskAction
-    void processMetadata() {
-        def jarFile = getTargetJar().get().asFile
-        if (!jarFile.exists()) {
-            return
-        }
-
-        URI uri = URI.create("jar:" + jarFile.toPath().toUri().toString())
-
-        try {
-            FileSystems.newFileSystem(uri, Collections.emptyMap()).withCloseable { fs ->
-                Path metadataPath = fs.getPath("/META-INF/jarjar/metadata.json")
-
-                if (Files.exists(metadataPath)) {
-                    def reader = Files.newBufferedReader(metadataPath)
-                    def json = new JsonSlurper().parse(reader)
-                    reader.close()
-
-                    if (json.jars instanceof List) {
-                        boolean removed = json.jars.removeIf { jarObj ->
-                            String pathStr = jarObj.path?.toString()
-                            return pathStr != null && pathStr.matches(".*webrtc-java-[0-9.]+-.*\\.jar")
-                        }
-
-                        if (removed) {
-                            def writer = Files.newBufferedWriter(metadataPath)
-                            writer.write(new JsonBuilder(json).toPrettyString())
-                            writer.close()
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            project.logger.error("Failed to process jarjar metadata in: " + jarFile.name, e)
-        }
-    }
-}
-
-tasks.register("removeWebRTCLibJarjarMetadata", RemoveWebRTCLibJarjarMetadata) {
-    targetJar.set(tasks.named("jar").flatMap { it.archiveFile })
-}
-
-tasks.named("build") {
-    finalizedBy tasks.named("removeWebRTCLibJarjarMetadata")
-}
-
-import java.nio.file.StandardCopyOption
-import java.util.jar.Manifest
-
-abstract class MakeLibMixinableTask extends DefaultTask {
-
-    @InputFile
-    abstract RegularFileProperty getTargetJar()
-
-    @TaskAction
-    void processJar() {
-        def mainJarFile = getTargetJar().get().asFile
-        if (!mainJarFile.exists()) {
-            return
-        }
-
-        URI mainUri = URI.create("jar:" + mainJarFile.toPath().toUri().toString())
-
-        try {
-            FileSystems.newFileSystem(mainUri, Collections.emptyMap()).withCloseable { mainFs ->
-                Path jarJarDir = mainFs.getPath("/META-INF/jarjar")
-                if (!Files.exists(jarJarDir)) {
-                    return
-                }
-
-                Files.list(jarJarDir).forEach { innerJarPath ->
-                    String fileName = innerJarPath.getFileName().toString()
-
-                    if (fileName.matches("webrtc-java-[0-9.]+\\.jar")) {
-                        Path tempJar = Files.createTempFile("temp-webrtc", ".jar")
-                        Files.copy(innerJarPath, tempJar, StandardCopyOption.REPLACE_EXISTING)
-
-                        boolean needsUpdate = false
-                        URI tempUri = URI.create("jar:" + tempJar.toUri().toString())
-
-                        FileSystems.newFileSystem(tempUri, Collections.emptyMap()).withCloseable { tempFs ->
-                            Path manifestPath = tempFs.getPath("/META-INF/MANIFEST.MF")
-
-                            if (Files.exists(manifestPath)) {
-                                Manifest manifest
-                                Files.newInputStream(manifestPath).withCloseable { is ->
-                                    manifest = new Manifest(is)
-                                }
-
-                                String fmlModType = manifest.getMainAttributes().getValue("FMLModType")
-                                if (fmlModType != "GAMELIBRARY") {
-                                    manifest.getMainAttributes().putValue("FMLModType", "GAMELIBRARY")
-                                    Files.newOutputStream(manifestPath).withCloseable { os ->
-                                        manifest.write(os)
-                                    }
-                                    needsUpdate = true
-                                }
-                            }
-                        }
-
-                        if (needsUpdate) {
-                            Files.copy(tempJar, innerJarPath, StandardCopyOption.REPLACE_EXISTING)
-                        }
-                        Files.deleteIfExists(tempJar)
-                    }
-                }
-            }
-        } catch (Exception e) {
-            project.logger.error("Failed to inject manifest entry in: " + mainJarFile.name, e)
-        }
-    }
-}
-
-tasks.register("makeLibMixinableTask", MakeLibMixinableTask) {
-    targetJar.set(tasks.named("jar").flatMap { it.archiveFile })
-    mustRunAfter tasks.named("removeWebRTCLibJarjarMetadata")
-}
-
-tasks.named("build") {
-    finalizedBy tasks.named("makeLibMixinableTask")
 }
 
 abstract class JarFromScratchAlias extends DefaultTask {

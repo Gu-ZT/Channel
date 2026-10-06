@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
+  "authors": [
+    "USS_Shenzhou",
+    "MalayP"
+  ],
+  "license": "${mod_license}",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "cn.ussshenzhou.channel.Channel"
+    ],
+    "client": [
+      "cn.ussshenzhou.channel.ChannelClient"
+    ]
+  },
+  "mixins": [
+    "channel.mixins.json",
+    "t88.mixins.json"
+  ],
+  "accessWidener": "channel.accesswidener",
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "minecraft": "${minecraft_version_range}",
+    "fabric-api": "*",
+    "java": ">=25"
+  }
+}

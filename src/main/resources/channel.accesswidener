@@ -1,0 +1,57 @@
+accessWidener v2 official
+
+# ===== 音频/混响 =====
+accessible field net/minecraft/client/sounds/SoundManager soundEngine Lnet/minecraft/client/sounds/SoundEngine;
+accessible field net/minecraft/client/sounds/SoundEngine library Lcom/mojang/blaze3d/audio/Library;
+accessible field net/minecraft/client/sounds/SoundEngine loaded Z
+accessible field net/minecraft/client/sounds/SoundEngine executor Lnet/minecraft/client/sounds/SoundEngineExecutor;
+accessible field com/mojang/blaze3d/audio/Library currentDevice J
+accessible field com/mojang/blaze3d/audio/Library context J
+
+# ===== 体素形状对象池（BitSetDiscreteVoxelShapeMixin）=====
+accessible field net/minecraft/world/phys/shapes/DiscreteVoxelShape xSize I
+mutable field net/minecraft/world/phys/shapes/DiscreteVoxelShape xSize I
+accessible field net/minecraft/world/phys/shapes/DiscreteVoxelShape ySize I
+mutable field net/minecraft/world/phys/shapes/DiscreteVoxelShape ySize I
+accessible field net/minecraft/world/phys/shapes/DiscreteVoxelShape zSize I
+mutable field net/minecraft/world/phys/shapes/DiscreteVoxelShape zSize I
+accessible field net/minecraft/world/phys/shapes/BitSetDiscreteVoxelShape storage Ljava/util/BitSet;
+mutable field net/minecraft/world/phys/shapes/BitSetDiscreteVoxelShape storage Ljava/util/BitSet;
+accessible field net/minecraft/world/phys/shapes/BitSetDiscreteVoxelShape xMin I
+accessible field net/minecraft/world/phys/shapes/BitSetDiscreteVoxelShape yMin I
+accessible field net/minecraft/world/phys/shapes/BitSetDiscreteVoxelShape zMin I
+accessible field net/minecraft/world/phys/shapes/BitSetDiscreteVoxelShape xMax I
+accessible field net/minecraft/world/phys/shapes/BitSetDiscreteVoxelShape yMax I
+accessible field net/minecraft/world/phys/shapes/BitSetDiscreteVoxelShape zMax I
+accessible method net/minecraft/world/phys/shapes/BitSetDiscreteVoxelShape getIndex (III)I
+
+# ===== GUI 框架（T88 内联）=====
+accessible field net/minecraft/client/gui/components/AbstractWidget x I
+accessible field net/minecraft/client/gui/components/AbstractWidget y I
+extendable method net/minecraft/client/gui/components/AbstractWidget extractRenderState (Lnet/minecraft/client/gui/GuiGraphicsExtractor;IIF)V
+extendable method net/minecraft/client/gui/components/AbstractButton extractWidgetRenderState (Lnet/minecraft/client/gui/GuiGraphicsExtractor;IIF)V
+
+extendable class net/minecraft/client/OptionInstance$OptionInstanceSliderButton
+accessible method net/minecraft/client/OptionInstance$OptionInstanceSliderButton <init> (Lnet/minecraft/client/Options;IIIILnet/minecraft/client/OptionInstance;Lnet/minecraft/client/OptionInstance$SliderableValueSet;Lnet/minecraft/client/OptionInstance$TooltipSupplier;Lnet/minecraft/client/OptionInstance$ValueUpdateListener;Z)V
+
+accessible field net/minecraft/client/gui/components/EditBox value Ljava/lang/String;
+accessible field net/minecraft/client/gui/components/EditBox maxLength I
+accessible field net/minecraft/client/gui/components/EditBox isEditable Z
+accessible field net/minecraft/client/gui/components/EditBox displayPos I
+accessible field net/minecraft/client/gui/components/EditBox cursorPos I
+accessible field net/minecraft/client/gui/components/EditBox highlightPos I
+accessible method net/minecraft/client/gui/components/EditBox onValueChange (Ljava/lang/String;)V
+accessible method net/minecraft/client/gui/components/EditBox updateTextPosition ()V
+accessible method net/minecraft/client/gui/components/EditBox scrollTo (I)V
+
+accessible field net/minecraft/client/gui/GuiGraphicsExtractor scissorStack Lnet/minecraft/client/gui/GuiGraphicsExtractor$ScissorStack;
+accessible field net/minecraft/client/gui/GuiGraphicsExtractor guiRenderState Lnet/minecraft/client/renderer/state/gui/GuiRenderState;
+accessible class net/minecraft/client/gui/GuiGraphicsExtractor$ScissorStack
+accessible field net/minecraft/client/gui/GuiGraphicsExtractor$ScissorStack stack Ljava/util/Deque;
+
+accessible class net/minecraft/client/gui/components/AbstractSelectionList$Entry
+accessible field net/minecraft/client/gui/components/AbstractSelectionList children Ljava/util/List;
+accessible field net/minecraft/client/gui/components/AbstractSelectionList hovered Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
+accessible field net/minecraft/client/gui/components/AbstractSelectionList MENU_LIST_BACKGROUND Lnet/minecraft/resources/Identifier;
+accessible field net/minecraft/client/gui/components/AbstractSelectionList INWORLD_MENU_LIST_BACKGROUND Lnet/minecraft/resources/Identifier;
+accessible method net/minecraft/client/gui/components/AbstractSelectionList repositionEntries ()V
