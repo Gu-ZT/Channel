@@ -1,4 +1,4 @@
-name: Neo Build
+name: Build
 
 on:
   workflow_dispatch:
@@ -189,21 +189,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/checkout@v4
-        with:
-          repository: USS-Shenzhou/t88
-          path: t88
-
       - uses: actions/setup-java@v4
         with:
           java-version: '25'
           distribution: 'temurin'
 
       - uses: gradle/actions/setup-gradle@v5
-
-      - name: Publish t88 to Maven Local
-        working-directory: ./t88
-        run: chmod +x gradlew && ./gradlew publishToMavenLocal
 
       # Download freshly built natives (if any were built)
       - name: Download built native libraries
