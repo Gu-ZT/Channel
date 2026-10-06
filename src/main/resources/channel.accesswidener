@@ -25,6 +25,9 @@ accessible field net/minecraft/world/phys/shapes/BitSetDiscreteVoxelShape yMax I
 accessible field net/minecraft/world/phys/shapes/BitSetDiscreteVoxelShape zMax I
 accessible method net/minecraft/world/phys/shapes/BitSetDiscreteVoxelShape getIndex (III)I
 
+# ===== 键位（Alt+键组合需在界面内判定绑定键）=====
+accessible field net/minecraft/client/KeyMapping key Lcom/mojang/blaze3d/platform/InputConstants$Key;
+
 # ===== GUI 框架（T88 内联）=====
 accessible field net/minecraft/client/gui/components/AbstractWidget x I
 accessible field net/minecraft/client/gui/components/AbstractWidget y I
@@ -41,7 +44,6 @@ accessible field net/minecraft/client/gui/components/EditBox displayPos I
 accessible field net/minecraft/client/gui/components/EditBox cursorPos I
 accessible field net/minecraft/client/gui/components/EditBox highlightPos I
 accessible method net/minecraft/client/gui/components/EditBox onValueChange (Ljava/lang/String;)V
-accessible method net/minecraft/client/gui/components/EditBox updateTextPosition ()V
 accessible method net/minecraft/client/gui/components/EditBox scrollTo (I)V
 
 accessible field net/minecraft/client/gui/GuiGraphicsExtractor scissorStack Lnet/minecraft/client/gui/GuiGraphicsExtractor$ScissorStack;

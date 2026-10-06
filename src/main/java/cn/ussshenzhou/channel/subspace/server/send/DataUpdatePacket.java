@@ -2,8 +2,8 @@ package cn.ussshenzhou.channel.subspace.server.send;
 
 import cn.ussshenzhou.channel.audio.server.RelayHandler;
 import cn.ussshenzhou.channel.subspace.SubspacePacket;
+import cn.ussshenzhou.channel.subspace.server.SubspaceConnection;
 import net.minecraft.network.FriendlyByteBuf;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import java.util.UUID;
 
@@ -17,7 +17,7 @@ public class DataUpdatePacket extends SubspacePacket {
 
     @Override
     public void encode(FriendlyByteBuf buf) {
-        var server = ServerLifecycleHooks.getCurrentServer();
+        var server = SubspaceConnection.getServer();
         if (server == null) {
             buf.writeVarInt(0);
             return;

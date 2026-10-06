@@ -4,7 +4,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
-import net.neoforged.neoforge.client.ClientCommandHandler;
 
 import java.util.Map;
 import java.util.Optional;
@@ -32,7 +31,7 @@ public class TCommandConstrainedEditBox extends TConstrainedEditBox {
         if (value.startsWith("/")) {
             value = value.replaceFirst("/", "");
         }
-        var sourceStack = ClientCommandHandler.getSource();
+        var sourceStack = ClientCommandSource.get();
         ParseResults<CommandSourceStack> parseResults = dispatcher.parse(value, sourceStack);
         Map<?, CommandSyntaxException> map = parseResults.getExceptions();
         if ((!map.isEmpty()) || parseResults.getContext().build(value).getNodes().isEmpty()) {

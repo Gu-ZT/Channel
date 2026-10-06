@@ -10,6 +10,6 @@ public class SubspacePacketHandler extends SimpleChannelInboundHandler<ByteBuf> 
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
         var buf = new FriendlyByteBuf(msg);
         var packet = new SubspaceAudioPacket(buf);
-        packet.clientHandler(null);
+        packet.clientHandler();
     }
 }

@@ -17,16 +17,14 @@ import cn.ussshenzhou.channel.util.IntervalCounter;
 import com.google.common.collect.MapMaker;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -36,20 +34,23 @@ import java.util.UUID;
 /**
  * @author USS_Shenzhou
  */
-@EventBusSubscriber(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class AudioReceiveHandler {
     public static final int PLAY_RATE10 = 2;
     private static final Set<SpeakerBlockEntity> CHANNELED_BLOCK_CACHE_C = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
 
-    @SubscribeEvent
-    public static void removeRemovedBlock(ClientTickEvent.Pre event) {
+    public static void register() {
+        ClientTickEvents.START_CLIENT_TICK.register(client -> removeRemovedBlock());
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> onExit());
+    }
+
+    public static void removeRemovedBlock() {
         synchronized (CHANNELED_BLOCK_CACHE_C) {
             CHANNELED_BLOCK_CACHE_C.removeIf(BlockEntity::isRemoved);
         }
     }
 
-    @SubscribeEvent
-    public static void onExit(ClientPlayerNetworkEvent.LoggingOut event) {
+    public static void onExit() {
         synchronized (CHANNELED_BLOCK_CACHE_C) {
             CHANNELED_BLOCK_CACHE_C.clear();
         }
@@ -135,8 +136,8 @@ public class AudioReceiveHandler {
         }
         // through walkie-talkie
         for (var item : localPlayer.getInventory()) {
-            if (item.is(ModItems.WALKIE_TALKIE.get())) {
-                var ch = item.get(ModItems.CHANNEL.get());
+            if (item.is(ModItems.WALKIE_TALKIE)) {
+                var ch = item.get(ModItems.CHANNEL);
                 if (ch != null && ch > 0 && channels.contains(ch.intValue())) {
                     var audio = (WalkieTalkieAudio) AudioManager.audios.compute(0, (_, old) -> old == null ? new WalkieTalkieAudio() : old);
                     audio.push(packet.from, decoded);

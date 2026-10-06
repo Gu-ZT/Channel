@@ -2,7 +2,6 @@ package cn.ussshenzhou.channel.subspace.client;
 
 import cn.ussshenzhou.channel.network.AudioPacket2C;
 import net.minecraft.network.FriendlyByteBuf;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;

@@ -10,7 +10,6 @@ import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -105,7 +104,7 @@ public abstract class TScreen extends Screen {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        NeoForge.EVENT_BUS.post(new ClearEditBoxFocusEvent(event.x(), event.y()));
+        new ClearEditBoxFocusEvent(event.x(), event.y()).post();
         for (TWidget tWidget : reversed(tChildren)) {
             if (!tWidget.isVisibleT()) {
                 continue;
@@ -191,6 +190,6 @@ public abstract class TScreen extends Screen {
         if (isFinal) {
             reversed(tChildren).forEach(TWidget::onFinalClose);
         }
-        Minecraft.getInstance().gui.popScreenLayer();
+        Minecraft.getInstance().gui.setScreen(null);
     }
 }

@@ -8,7 +8,6 @@ import cn.ussshenzhou.t88.gui.advanced.TOptionsPanel;
 import cn.ussshenzhou.t88.gui.event.ResizeHudEvent;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.List;
 
@@ -26,7 +25,7 @@ public class GeneralConfigPanel extends TOptionsPanel {
                 List.of(false, true),
                 bool -> _ -> {
                     ChannelClientConfig.write(c -> c.showHudIcon = bool);
-                    NeoForge.EVENT_BUS.post(new ResizeHudEvent());
+                    ResizeHudEvent.EVENT.invoker().onResize(new ResizeHudEvent());
                 },
                 entry -> entry.getContent() == cfg.showHudIcon
         ).getSecond().setTooltip(Tooltip.create(Component.translatable("channel.config.dispay.hud.tooltip")));

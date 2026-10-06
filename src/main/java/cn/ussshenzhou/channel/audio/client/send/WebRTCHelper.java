@@ -5,8 +5,7 @@ import cn.ussshenzhou.channel.audio.NC;
 import cn.ussshenzhou.channel.audio.Trigger;
 import cn.ussshenzhou.channel.util.ModConstant;
 import com.mojang.logging.LogUtils;
-import net.neoforged.fml.loading.FMLEnvironment;
-import org.jline.utils.Log;
+import net.fabricmc.loader.api.FabricLoader;
 
 import javax.annotation.Nullable;
 import java.lang.foreign.Arena;
@@ -61,7 +60,7 @@ public class WebRTCHelper {
         } else {
             throw new RuntimeException("Unsupported OS: " + osName);
         }
-        if (!FMLEnvironment.isProduction()) {
+        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
             LogUtils.getLogger().warn("RUNNING IN DEV ENV: If you are loading Channel in dev env, you may need to manually extract lib file (e.g. webrtc.dll) in the jar to your run/ dir.");
             System.load(Path.of("").toAbsolutePath().resolve(libName).toString());
             return;

@@ -5,7 +5,6 @@ import cn.ussshenzhou.t88.mixin.MutableComponentAccessor;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.PlainTextContents.LiteralContents;
-import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * @author USS_Shenzhou
@@ -139,7 +138,7 @@ public class TTimer extends TLabel {
                     time = 0;
                     updateText();
                     updateGui = false;
-                    NeoForge.EVENT_BUS.post(new TimerCountdownReachEvent(this));
+                    TimerCountdownReachEvent.EVENT.invoker().onCountdownReach(new TimerCountdownReachEvent(this));
                 }
             }
         } else {

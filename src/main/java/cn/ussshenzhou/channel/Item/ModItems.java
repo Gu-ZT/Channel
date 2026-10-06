@@ -3,85 +3,80 @@ package cn.ussshenzhou.channel.Item;
 import cn.ussshenzhou.channel.Channel;
 import cn.ussshenzhou.channel.block.ModBlocks;
 import com.mojang.serialization.Codec;
+import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import net.neoforged.neoforge.registries.DeferredRegister;
-
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 
 /**
  * @author USS_Shenzhou
  */
-@EventBusSubscriber
 public class ModItems {
     //----------Data Component----------
-    public static final DeferredRegister.DataComponents DATA_COMPONENTS = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, Channel.MODID);
-
-    public static final Supplier<DataComponentType<Integer>> CHANNEL = DATA_COMPONENTS.registerComponentType("channel", builder ->
-            builder.persistent(Codec.INT).networkSynchronized(ByteBufCodecs.INT)
+    public static final DataComponentType<Integer> CHANNEL = Registry.register(
+            BuiltInRegistries.DATA_COMPONENT_TYPE,
+            Identifier.fromNamespaceAndPath(Channel.MODID, "channel"),
+            DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.INT).build()
     );
 
     //----------Item----------
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, Channel.MODID);
-
-    public static final Supplier<Item> HANDHELD_MIC_ITEM = ITEMS.register("handheld_mic", () -> new HandheldMic(new Item.Properties()
+    public static final Item HANDHELD_MIC_ITEM = register("handheld_mic", new HandheldMic(new Item.Properties()
             .stacksTo(1)
-            .component(CHANNEL.get(), 0)
+            .component(CHANNEL, 0)
             .setId(ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Channel.MODID, "handheld_mic")))
     ));
-    public static final Supplier<Item> MIC_ITEM = ITEMS.register("mic", () -> new BlockItem(ModBlocks.MIC_BLOCK.get(), new Item.Properties()
+    public static final Item MIC_ITEM = register("mic", new BlockItem(ModBlocks.MIC_BLOCK, new Item.Properties()
             .setId(ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Channel.MODID, "mic")))
     ));
-    public static final Supplier<Item> SPEAKER_ITEM = ITEMS.register("speaker", () -> new BlockItem(ModBlocks.SPEAKER_BLOCK.get(), new Item.Properties()
+    public static final Item SPEAKER_ITEM = register("speaker", new BlockItem(ModBlocks.SPEAKER_BLOCK, new Item.Properties()
             .setId(ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Channel.MODID, "speaker")))
     ));
-    public static final Supplier<Item> SPEAKER_STAND_ITEM = ITEMS.register("speaker_stand", () -> new BlockItem(ModBlocks.SPEAKER_STAND_BLOCK.get(), new Item.Properties()
+    public static final Item SPEAKER_STAND_ITEM = register("speaker_stand", new BlockItem(ModBlocks.SPEAKER_STAND_BLOCK, new Item.Properties()
             .setId(ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Channel.MODID, "speaker_stand")))
     ));
-    public static final Supplier<Item> SPEAKER_HANG_ITEM = ITEMS.register("speaker_hang", () -> new BlockItem(ModBlocks.SPEAKER_HANG_BLOCK.get(), new Item.Properties()
+    public static final Item SPEAKER_HANG_ITEM = register("speaker_hang", new BlockItem(ModBlocks.SPEAKER_HANG_BLOCK, new Item.Properties()
             .setId(ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Channel.MODID, "speaker_hang")))
     ));
-    public static final Supplier<Item> WALKIE_TALKIE = ITEMS.register("walkie_talkie", () -> new WalkieTalkie(new Item.Properties()
+    public static final Item WALKIE_TALKIE = register("walkie_talkie", new WalkieTalkie(new Item.Properties()
             .stacksTo(1)
-            .component(CHANNEL.get(), 0)
+            .component(CHANNEL, 0)
             .setId(ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Channel.MODID, "walkie_talkie")))
     ));
 
     //----------Creative Mode Tab----------
-    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Channel.MODID);
+    public static final CreativeModeTab TAB = Registry.register(
+            BuiltInRegistries.CREATIVE_MODE_TAB,
+            Identifier.fromNamespaceAndPath(Channel.MODID, "main"),
+            CreativeModeTab.builder(CreativeModeTab.Row.TOP, 0)
+                    .icon(() -> new ItemStack(MIC_ITEM))
+                    .title(Component.translatable("channel.tab.title"))
+                    .displayItems((displayParameters, output) -> {
+                        output.accept(HANDHELD_MIC_ITEM);
+                        output.accept(MIC_ITEM);
+                        output.accept(SPEAKER_ITEM);
+                        output.accept(SPEAKER_STAND_ITEM);
+                        output.accept(SPEAKER_HANG_ITEM);
+                        output.accept(WALKIE_TALKIE);
+                    })
+                    .build()
+    );
 
-    public static final Supplier<CreativeModeTab> TAB = CREATIVE_MODE_TABS.register("main", () -> CreativeModeTab.builder()
-            .icon(() -> new ItemStack(MIC_ITEM.get()))
-            .title(Component.translatable("channel.tab.title"))
-            .build());
+    /**
+     * 触发类加载以完成静态字段注册。
+     */
+    public static void init() {
+    }
 
-    @SubscribeEvent
-    public static void onBuildContents(BuildCreativeModeTabContentsEvent event) {
-        var tab = BuiltInRegistries.CREATIVE_MODE_TAB.getKey(event.getTab());
-        if (tab != null && tab.equals(BuiltInRegistries.CREATIVE_MODE_TAB.getKey(TAB.get()))) {
-            event.acceptAll(Stream.of(
-                    HANDHELD_MIC_ITEM,
-                    MIC_ITEM,
-                    SPEAKER_ITEM,
-                    SPEAKER_STAND_ITEM,
-                    SPEAKER_HANG_ITEM,
-                    WALKIE_TALKIE
-            ).map(s -> new ItemStack(s.get())).toList());
-        }
+    private static <T extends Item> T register(String name, T item) {
+        return Registry.register(BuiltInRegistries.ITEM, Identifier.fromNamespaceAndPath(Channel.MODID, name), item);
     }
 }

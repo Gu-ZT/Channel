@@ -7,16 +7,15 @@ import cn.ussshenzhou.t88.gui.advanced.TLabelButton;
 import cn.ussshenzhou.t88.gui.advanced.TOptionsPanel;
 import cn.ussshenzhou.t88.gui.util.Border;
 import cn.ussshenzhou.t88.gui.widegt.*;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.PlayerFaceExtractor;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import org.joml.Vector2i;
 
 import java.util.*;
@@ -95,11 +94,15 @@ public class OutputConfigPanel extends TOptionsPanel {
     }
 
 
-    @EventBusSubscriber(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public static class PlayerVolumePanel extends TPanel {
 
         private static final LinkedHashSet<UUID> PLAYERS = new LinkedHashSet<>();
         private static boolean dirty = true;
+
+        public static void register() {
+            ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> onLogout());
+        }
 
         public PlayerVolumePanel() {
             if (SharedConstants.IS_RUNNING_IN_IDE) {
@@ -115,8 +118,7 @@ public class OutputConfigPanel extends TOptionsPanel {
             PLAYERS.add(id);
         }
 
-        @SubscribeEvent
-        public static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
+        public static void onLogout() {
             PLAYERS.clear();
             dirty = true;
         }

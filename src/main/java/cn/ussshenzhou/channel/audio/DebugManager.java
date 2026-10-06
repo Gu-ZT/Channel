@@ -5,11 +5,12 @@ import cn.ussshenzhou.channel.subspace.client.SubspaceConnection;
 import cn.ussshenzhou.channel.util.IntervalCounter;
 import cn.ussshenzhou.channel.util.TimeCounter;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Util;
-import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.fml.util.thread.EffectiveSide;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -40,7 +41,7 @@ public class DebugManager {
     public static final TimeCounter RELAY_PING = new TimeCounter(LONG_MEASURE_WINDOW_MS);
 
     static {
-        if (EffectiveSide.get().isClient()) {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             SCHEDULER.scheduleAtFixedRate(DebugManager::ping, 0, 500, TimeUnit.MILLISECONDS);
         }
     }
@@ -92,7 +93,8 @@ public class DebugManager {
                 } else {
                     ICMP_PING.put(LONG_MEASURE_WINDOW_MS);
                 }
-            } catch (IOException ignored) {
+            } catch (IOException e) {
+                LogUtils.getLogger().debug("ICMP ping to {} failed", host, e);
             }
         });
     }

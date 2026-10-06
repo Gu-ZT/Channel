@@ -42,7 +42,7 @@ public class MicBlock extends ChanneledBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (player.getMainHandItem().is(ModItems.MIC_ITEM.get())) {
+        if (player.getMainHandItem().is(ModItems.MIC_ITEM)) {
             return InteractionResult.PASS;
         } else {
             return super.useWithoutItem(state, level, pos, player, hitResult);

@@ -4,7 +4,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.logging.LogUtils;
-import net.neoforged.fml.loading.FMLPaths;
+import net.fabricmc.loader.api.FabricLoader;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -21,7 +21,7 @@ import java.util.function.Consumer;
  * @author USS_Shenzhou
  */
 public class ConfigHelper {
-    private static final File CONFIG_DIR = FMLPaths.CONFIGDIR.relative().toFile();
+    private static final File CONFIG_DIR = FabricLoader.getInstance().getConfigDir().toFile();
     private static final ConcurrentHashMap<Class<? extends TConfig>, TConfig> CACHE = new ConcurrentHashMap<>();
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().enableComplexMapKeySerialization().create();
     private static final File UNIVERSAL_CONFIG_DIR = FileUtils.getUserDirectory().toPath().resolve("MinecraftT88Config").toFile();

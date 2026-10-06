@@ -9,6 +9,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 public class MicBlockEntity extends ChanneledBlockEntity {
 
     public MicBlockEntity(BlockPos worldPosition, BlockState blockState) {
-        super(ModBlockEntityTypes.MIC_BLOCK_ENTITY_TYPE.get(), worldPosition, blockState);
+        super(ModBlockEntityTypes.MIC_BLOCK_ENTITY_TYPE, worldPosition, blockState);
     }
 }

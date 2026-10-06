@@ -5,6 +5,9 @@ import cn.ussshenzhou.channel.audio.client.receive.AudioManager;
 import cn.ussshenzhou.channel.audio.client.receive.AudioReceiveHandler;
 import cn.ussshenzhou.channel.config.ChannelClientConfig;
 import cn.ussshenzhou.channel.util.AudioHelper;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -14,10 +17,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
 import org.joml.Quaternionf;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
@@ -36,7 +35,7 @@ import static org.lwjgl.openal.EXTEfx.*;
  * @author USS_Shenzhou
  */
 @ParametersAreNonnullByDefault
-@EventBusSubscriber(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class RayTraceManager {
     static final int MAX_DISTANCE = 64;
     static final int MAX_BOUNCE_ROUND = 5;
@@ -79,8 +78,11 @@ public class RayTraceManager {
 
     private static long lastUpdate = 0;
 
-    @SubscribeEvent
-    public static void tick(ClientTickEvent.Post event) {
+    public static void register() {
+        ClientTickEvents.END_CLIENT_TICK.register(client -> tick());
+    }
+
+    public static void tick() {
         if (Minecraft.getInstance().level == null || !ChannelClientConfig.get().rayTraceAudio) {
             return;
         }
@@ -144,7 +146,8 @@ public class RayTraceManager {
             var hitPos = hitResult.getLocation();
             var blockPos = hitResult.getBlockPos();
             var block = level.getBlockState(blockPos);
-            var soundType = block.getSoundType(level, blockPos, null);
+            // 无参版本不含方块上下文，对按上下文返回不同音效类型的方块会取默认值
+            var soundType = block.getSoundType();
             synchronized (HIT_POINTS) {
                 HIT_POINTS.add(new HitPoint(round, new Vec3(hitPos.x, hitPos.y, hitPos.z), journey, distance, BlockSoundProperty.get(soundType), hitResult.getDirection()));
             }

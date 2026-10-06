@@ -1,26 +1,26 @@
 package cn.ussshenzhou.channel.subspace.client;
 
 import cn.ussshenzhou.channel.network.TalkPacket2S;
-import cn.ussshenzhou.channel.subspace.server.send.DataUpdatePacket;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.util.Util;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-@EventBusSubscriber(value = Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class ClientEventListener {
     private static long lastHeartbeat = 0;
 
-    @SubscribeEvent
-    public static void onExit(ClientPlayerNetworkEvent.LoggingOut event) {
+    public static void register() {
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> onExit());
+        ClientTickEvents.START_CLIENT_TICK.register(client -> updatePlayerData());
+    }
+
+    public static void onExit() {
         SubspaceConnection.terminate();
     }
 
-    @SubscribeEvent
-    public static void updatePlayerData(ClientTickEvent.Pre event) {
+    public static void updatePlayerData() {
         if (SubspaceConnection.using()) {
             var now = Util.getMillis();
             if (now - lastHeartbeat > 1000) {

@@ -6,8 +6,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * @author USS_Shenzhou
@@ -39,10 +39,10 @@ public class SetItemChannelPacket implements CustomPacketPayload {
         buf.writeVarInt(channel);
     }
 
-    public void serverHandler(IPayloadContext context) {
-        var item = context.player().getItemInHand(hand);
-        if (item.has(ModItems.CHANNEL.get())) {
-            item.set(ModItems.CHANNEL.get(), channel);
+    public void serverHandler(ServerPlayer player) {
+        var item = player.getItemInHand(hand);
+        if (item.has(ModItems.CHANNEL)) {
+            item.set(ModItems.CHANNEL, channel);
         }
     }
 }

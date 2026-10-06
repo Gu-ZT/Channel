@@ -2,6 +2,7 @@ package cn.ussshenzhou.channel.block;
 
 import cn.ussshenzhou.channel.Channel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -12,22 +13,17 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.registries.DeferredRegister;
-
-import java.util.function.Supplier;
 
 /**
  * @author USS_Shenzhou
  */
 public class ModBlocks {
-    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(BuiltInRegistries.BLOCK, Channel.MODID);
-
-    public static final Supplier<Block> MIC_BLOCK = BLOCKS.register("mic", () -> new MicBlock(BlockBehaviour.Properties.of()
+    public static final Block MIC_BLOCK = register("mic", new MicBlock(BlockBehaviour.Properties.of()
             .noOcclusion()
             .setId(ResourceKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(Channel.MODID, "mic")))
     ));
 
-    public static final Supplier<Block> SPEAKER_BLOCK = BLOCKS.register("speaker", () -> new SpeakerBlock(BlockBehaviour.Properties.of()
+    public static final Block SPEAKER_BLOCK = register("speaker", new SpeakerBlock(BlockBehaviour.Properties.of()
             .noOcclusion()
             .setId(ResourceKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(Channel.MODID, "speaker")))
     ) {
@@ -48,7 +44,7 @@ public class ModBlocks {
         }
     });
 
-    public static final Supplier<Block> SPEAKER_STAND_BLOCK = BLOCKS.register("speaker_stand", () -> new SpeakerBlock(BlockBehaviour.Properties.of()
+    public static final Block SPEAKER_STAND_BLOCK = register("speaker_stand", new SpeakerBlock(BlockBehaviour.Properties.of()
             .noOcclusion()
             .setId(ResourceKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(Channel.MODID, "speaker_stand")))
     ) {
@@ -60,7 +56,7 @@ public class ModBlocks {
         }
     });
 
-    public static final Supplier<Block> SPEAKER_HANG_BLOCK = BLOCKS.register("speaker_hang", () -> new SpeakerBlock(BlockBehaviour.Properties.of()
+    public static final Block SPEAKER_HANG_BLOCK = register("speaker_hang", new SpeakerBlock(BlockBehaviour.Properties.of()
             .noOcclusion()
             .setId(ResourceKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(Channel.MODID, "speaker_hang")))
     ) {
@@ -80,4 +76,14 @@ public class ModBlocks {
             };
         }
     });
+
+    /**
+     * 触发类加载以完成静态字段注册。
+     */
+    public static void init() {
+    }
+
+    private static <T extends Block> T register(String name, T block) {
+        return Registry.register(BuiltInRegistries.BLOCK, Identifier.fromNamespaceAndPath(Channel.MODID, name), block);
+    }
 }

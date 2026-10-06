@@ -7,7 +7,7 @@ import cn.ussshenzhou.t88.gui.screen.TScreen;
 import cn.ussshenzhou.t88.gui.util.LayoutHelper;
 import cn.ussshenzhou.t88.gui.widegt.TLabel;
 import cn.ussshenzhou.t88.gui.widegt.TSlider;
-import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -95,7 +95,7 @@ public class BlockChannelSettingScreen extends TScreen {
         if (updated) {
             var s = channelEditBox.getValue();
             if (channelEditBox.check(s)) {
-                ClientPacketDistributor.sendToServer(new SetBlockChannelPacket(channeledBlockEntity.getBlockPos(), getEditBoxValue()));
+                ClientPlayNetworking.send(new SetBlockChannelPacket(channeledBlockEntity.getBlockPos(), getEditBoxValue()));
             }
             updated = false;
         }

@@ -6,17 +6,13 @@ import cn.ussshenzhou.channel.network.OpMutePacket;
 import cn.ussshenzhou.channel.subspace.server.SubspaceConnection;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
 
-@EventBusSubscriber
 public class ChannelCommand {
 
     public static void channelCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -30,7 +26,7 @@ public class ChannelCommand {
                                                     var now = ChannelServerConfig.get().muteNoneOP;
                                                     ChannelServerConfig.write(c -> c.muteNoneOP = !now);
                                                     ct.getSource().sendSystemMessage(Component.literal(now ? "All players can talk now." : "Only OP 2 can talk now."));
-                                                    PacketDistributor.sendToAllPlayers(new OpMutePacket(!now));
+                                                    ct.getSource().getServer().getPlayerList().getPlayers().forEach(p -> ServerPlayNetworking.send(p, new OpMutePacket(!now)));
                                                     return Command.SINGLE_SUCCESS;
                                                 })
                                         )
@@ -55,11 +51,10 @@ public class ChannelCommand {
         );
     }
 
-    @SubscribeEvent
-    public static void playerLogIn(PlayerEvent.PlayerLoggedInEvent event) {
+    public static void playerLogIn(ServerPlayer player) {
         var mute = ChannelServerConfig.get().muteNoneOP;
-        if (mute && event.getEntity() instanceof ServerPlayer player) {
-            PacketDistributor.sendToPlayer(player, new OpMutePacket(mute));
+        if (mute) {
+            ServerPlayNetworking.send(player, new OpMutePacket(mute));
         }
     }
 }

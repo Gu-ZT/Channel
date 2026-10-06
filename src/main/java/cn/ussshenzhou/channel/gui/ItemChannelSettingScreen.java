@@ -9,7 +9,7 @@ import cn.ussshenzhou.t88.gui.screen.TScreen;
 import cn.ussshenzhou.t88.gui.util.LayoutHelper;
 import cn.ussshenzhou.t88.gui.widegt.TLabel;
 import cn.ussshenzhou.t88.gui.widegt.TSlider;
-import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -46,7 +46,7 @@ public class ItemChannelSettingScreen extends TScreen {
                 }
             }
         };
-        var channel = itemStack.getOrDefault(ModItems.CHANNEL.get(), 0);
+        var channel = itemStack.getOrDefault(ModItems.CHANNEL, 0);
         channelEditBox.setValue(channel == 0 ? getUnset() : String.valueOf(channel));
         channelEditBox.addResponder(s -> {
             if (channelEditBox.check(s)) {
@@ -99,7 +99,7 @@ public class ItemChannelSettingScreen extends TScreen {
         if (updated) {
             var s = channelEditBox.getValue();
             if (channelEditBox.check(s)) {
-                ClientPacketDistributor.sendToServer(new SetItemChannelPacket(hand, getEditBoxValue()));
+                ClientPlayNetworking.send(new SetItemChannelPacket(hand, getEditBoxValue()));
             }
             updated = false;
         }

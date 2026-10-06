@@ -5,13 +5,12 @@ import cn.ussshenzhou.channel.audio.client.rt.RayTraceManager;
 import cn.ussshenzhou.channel.config.ChannelClientConfig;
 import cn.ussshenzhou.channel.subspace.client.SubspaceConnection;
 import com.mojang.logging.LogUtils;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import org.lwjgl.openal.AL;
 import org.lwjgl.openal.ALC;
 
@@ -25,7 +24,7 @@ import static org.lwjgl.openal.AL10.*;
 import static org.lwjgl.openal.AL11.AL_EXPONENT_DISTANCE;
 import static org.lwjgl.openal.ALC10.alcMakeContextCurrent;
 
-@EventBusSubscriber(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class AudioManager {
     public static final ScheduledExecutorService AUDIO_EXECUTOR = Executors.newSingleThreadScheduledExecutor(r ->
             Thread.ofPlatform()
@@ -38,8 +37,11 @@ public class AudioManager {
     static long alCtx;
     static long alDevice;
 
-    @SubscribeEvent
-    public static void onExit(ClientPlayerNetworkEvent.LoggingOut event) {
+    public static void register() {
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> onExit());
+    }
+
+    public static void onExit() {
         reset();
     }
 

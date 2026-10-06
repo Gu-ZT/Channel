@@ -14,7 +14,6 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedList;
@@ -28,6 +27,7 @@ public class TEditBox extends EditBox implements TWidget, TResponder<String> {
     TScreen parentScreen = null;
     protected final LinkedList<Consumer<String>> responders = new LinkedList<>();
     protected boolean checkInput = false;
+    private final Consumer<ClearEditBoxFocusEvent> clearFocusListener = this::onClearEditBoxFocusEvent;
 
     protected void onClearEditBoxFocusEvent(ClearEditBoxFocusEvent event) {
         this.setFocused(false);
@@ -36,9 +36,9 @@ public class TEditBox extends EditBox implements TWidget, TResponder<String> {
     public TEditBox(Component tipText) {
         super(Minecraft.getInstance().font, 0, 0, 0, 0, tipText);
         this.setMaxLength(32500);
-        NeoForge.EVENT_BUS.addListener(this::onClearEditBoxFocusEvent);
+        ClearEditBoxFocusEvent.register(clearFocusListener);
         setResponder(this::respond);
-        this.addResponder(s -> NeoForge.EVENT_BUS.post(new TWidgetContentUpdatedEvent(this)));
+        this.addResponder(s -> TWidgetContentUpdatedEvent.EVENT.invoker().onContentUpdated(new TWidgetContentUpdatedEvent(this)));
     }
 
     @Override
@@ -88,7 +88,7 @@ public class TEditBox extends EditBox implements TWidget, TResponder<String> {
 
     @Override
     public void onFinalClose() {
-        NeoForge.EVENT_BUS.unregister(this);
+        ClearEditBoxFocusEvent.unregister(clearFocusListener);
         TWidget.super.onFinalClose();
     }
 
@@ -207,12 +207,7 @@ public class TEditBox extends EditBox implements TWidget, TResponder<String> {
 
     @Override
     public void layout() {
-        this.updateTextPosition();
-    }
-
-    @Override
-    public void updateTextPosition() {
-        super.updateTextPosition();
+        // EditBox 已自行维护文本滚动位置，布局时直接滚动到光标处
         this.scrollTo(this.getCursorPosition());
     }
 

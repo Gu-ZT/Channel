@@ -12,17 +12,16 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.SharedConstants;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,7 +31,6 @@ import java.util.concurrent.Executors;
 /**
  * @author USS_Shenzhou
  */
-@EventBusSubscriber
 public class RelayHandler {
     //----------Channeled blockentity cache----------
     private static final ConcurrentHashMap<ResourceKey<Level>, Set<ChanneledBlockEntity>> CHANNELED_BLOCK_CACHE_S = new ConcurrentHashMap<>();
@@ -52,15 +50,18 @@ public class RelayHandler {
     public static final Map<ServerPlayer, IntArraySet> PLAYER_CHANNELS_SEND = new MapMaker().weakKeys().makeMap();
     public static final Int2ObjectOpenHashMap<Set<ServerPlayer>> CHANNEL_PLAYERS_RECEIVE = new Int2ObjectOpenHashMap<>();
 
-    @SubscribeEvent
-    public static void updateRoute(ServerTickEvent.Pre event) {
-        if (event.getServer().getTickCount() % 10 == 0) {
+    public static void register() {
+        ServerTickEvents.START_SERVER_TICK.register(RelayHandler::updateRoute);
+    }
+
+    public static void updateRoute(MinecraftServer server) {
+        if (server.getTickCount() % 10 == 0) {
             SERVER_ROUTE_THREAD.execute(() -> {
                 try {
                     Int2ObjectOpenHashMap<Set<ServerPlayer>> chanelPlayersReceive = new Int2ObjectOpenHashMap<>();
                     synchronized (CHANNELED_BLOCK_CACHE_S) {
                         CHANNELED_BLOCK_CACHE_S.forEach((_, s) -> s.removeIf(BlockEntity::isRemoved));
-                        for (var player : event.getServer().getPlayerList().getPlayers()) {
+                        for (var player : server.getPlayerList().getPlayers()) {
                             PLAYER_CHANNELS_SEND.put(player, findNearbySendingDeviceChannels(player));
                             findNearbyReceivingDeviceChannels(player)
                                     .forEach(i -> chanelPlayersReceive
@@ -91,8 +92,8 @@ public class RelayHandler {
 
     private static void checkHandSend(ServerPlayer from, IntArraySet channels, InteractionHand hand) {
         var item0 = from.getItemInHand(hand);
-        if (item0.is(ModItems.HANDHELD_MIC_ITEM.get()) || item0.is(ModItems.WALKIE_TALKIE.get())) {
-            var ch = item0.get(ModItems.CHANNEL.get());
+        if (item0.is(ModItems.HANDHELD_MIC_ITEM) || item0.is(ModItems.WALKIE_TALKIE)) {
+            var ch = item0.get(ModItems.CHANNEL);
             if (ch != null && ch > 0) {
                 channels.add(ch.intValue());
             }
@@ -176,7 +177,7 @@ public class RelayHandler {
                 }
             }
         }
-        tos.forEach(to -> PacketDistributor.sendToPlayer(to, new AudioPacket2C(from.getUUID(), opusAudio, channels)));
+        tos.forEach(to -> ServerPlayNetworking.send(to, new AudioPacket2C(from.getUUID(), opusAudio, channels)));
     }
 
     public static boolean closeHear(ServerPlayer from, ServerPlayer to) {

@@ -7,7 +7,6 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.neoforged.neoforge.common.NeoForge;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -96,7 +95,7 @@ public class TCycleButton<E> extends TButton {
         if (c != null) {
             c.accept(this);
         }
-        NeoForge.EVENT_BUS.post(new TWidgetContentUpdatedEvent(this));
+        TWidgetContentUpdatedEvent.EVENT.invoker().onContentUpdated(new TWidgetContentUpdatedEvent(this));
     }
 
     public void selectWithoutRespond(int index) throws IndexOutOfBoundsException {
@@ -104,7 +103,7 @@ public class TCycleButton<E> extends TButton {
         index = Mth.clamp(index, 0, values.size() - 1);
         this.cycleIndex = index;
         this.setMessage(values.get(cycleIndex).getNarration());
-        NeoForge.EVENT_BUS.post(new TWidgetContentUpdatedEvent(this));
+        TWidgetContentUpdatedEvent.EVENT.invoker().onContentUpdated(new TWidgetContentUpdatedEvent(this));
     }
 
     public void select(Entry entry) {
@@ -165,7 +164,7 @@ public class TCycleButton<E> extends TButton {
         } else {
             this.cycleIndex = 0;
             this.setMessage(Component.empty());
-            NeoForge.EVENT_BUS.post(new TWidgetContentUpdatedEvent(this));
+            TWidgetContentUpdatedEvent.EVENT.invoker().onContentUpdated(new TWidgetContentUpdatedEvent(this));
         }
     }
 

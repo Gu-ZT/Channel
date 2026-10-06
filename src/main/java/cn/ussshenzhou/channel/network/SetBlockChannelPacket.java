@@ -7,7 +7,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraft.server.level.ServerPlayer;
 
 /**
  * @author USS_Shenzhou
@@ -39,8 +39,8 @@ public class SetBlockChannelPacket implements CustomPacketPayload {
         buf.writeVarInt(channel);
     }
 
-    public void serverHandler(IPayloadContext context) {
-        var level = context.player().level();
+    public void serverHandler(ServerPlayer player) {
+        var level = player.level();
         if (level.isLoaded(pos) && level.getBlockEntity(pos) instanceof ChanneledBlockEntity channeledBlockEntity) {
             channeledBlockEntity.setChannel(channel);
         }

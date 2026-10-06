@@ -2,7 +2,6 @@ package cn.ussshenzhou.t88.mixin;
 
 import cn.ussshenzhou.t88.gui.event.ResizeHudEvent;
 import net.minecraft.client.Minecraft;
-import net.neoforged.neoforge.common.NeoForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,6 +15,6 @@ public class MinecraftMixin {
 
     @Inject(method = "resizeGui",at = @At("RETURN"))
     private void t88ResizeHud(CallbackInfo ci){
-        NeoForge.EVENT_BUS.post(new ResizeHudEvent());
+        ResizeHudEvent.EVENT.invoker().onResize(new ResizeHudEvent());
     }
 }

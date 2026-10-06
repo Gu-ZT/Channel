@@ -78,7 +78,6 @@ public class TItem extends TPanel {
                     Minecraft.getInstance().font,
                     Screen.getTooltipFromItem(Minecraft.getInstance(), item),
                     item.getTooltipImage(),
-                    item,
                     x,
                     y,
                     item.get(DataComponents.TOOLTIP_STYLE)

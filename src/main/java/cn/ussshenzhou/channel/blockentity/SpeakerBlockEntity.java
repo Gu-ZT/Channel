@@ -9,6 +9,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 public class SpeakerBlockEntity extends ChanneledBlockEntity {
 
     public SpeakerBlockEntity(BlockPos worldPosition, BlockState blockState) {
-        super(ModBlockEntityTypes.SPEAKER_BLOCK_ENTITY_TYPE.get(), worldPosition, blockState);
+        super(ModBlockEntityTypes.SPEAKER_BLOCK_ENTITY_TYPE, worldPosition, blockState);
     }
 }

@@ -7,7 +7,6 @@
   "client": [
     "AbstractContainerWidgetMixin",
     "AbstractWidgetMixin",
-    "GameRendererMixin",
     "MinecraftMixin",
     "MutableComponentAccessor"
   ],

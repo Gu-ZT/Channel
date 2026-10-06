@@ -10,30 +10,32 @@ import cn.ussshenzhou.t88.gui.HudManager;
 import cn.ussshenzhou.t88.gui.widegt.TImage;
 import cn.ussshenzhou.t88.gui.widegt.TPanel;
 import cn.ussshenzhou.t88.gui.widegt.TProgressBar;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.permissions.Permissions;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 
 /**
  * @author USS_Shenzhou
  */
-@EventBusSubscriber(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class MicrophoneHud extends TPanel {
 
-    @SubscribeEvent
-    public static void onPlayerIn(ClientPlayerNetworkEvent.LoggingIn event) {
+    public static void register() {
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> onPlayerIn());
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> onPlayerOut());
+    }
+
+    public static void onPlayerIn() {
         HudManager.addOrReplaceIfSameClassExist(new MicrophoneHud());
     }
 
-    @SubscribeEvent
-    public static void onPlayerOut(ClientPlayerNetworkEvent.LoggingOut event) {
+    public static void onPlayerOut() {
         HudManager.removeInstanceOf(MicrophoneHud.class);
     }
 

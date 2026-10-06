@@ -7,21 +7,23 @@ import cn.ussshenzhou.channel.audio.client.send.WebRTCHelper;
 import cn.ussshenzhou.channel.audio.nativ.NvidiaHelper;
 import cn.ussshenzhou.channel.config.ChannelClientConfig;
 import cn.ussshenzhou.channel.gui.MicConfirmScreen;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.minecraft.client.Minecraft;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.lifecycle.ClientStartedEvent;
 
 /**
  * @author USS_Shenzhou
  */
-@EventBusSubscriber(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class Initializer {
     private static boolean initialized = false;
 
-    @SubscribeEvent
-    public static void initNative(ClientStartedEvent event){
+    public static void register() {
+        ClientLifecycleEvents.CLIENT_STARTED.register(client -> initNative());
+    }
+
+    public static void initNative(){
         MicReader.init();
         WebRTCHelper.init();
         NvidiaHelper.init();

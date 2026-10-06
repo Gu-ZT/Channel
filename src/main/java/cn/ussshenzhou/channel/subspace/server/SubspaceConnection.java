@@ -14,13 +14,14 @@ import io.netty.channel.nio.NioIoHandler;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.DefaultThreadFactory;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.Varint21FrameDecoder;
 import net.minecraft.network.Varint21LengthFieldPrepender;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import org.jspecify.annotations.Nullable;
 
 import java.security.SecureRandom;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +33,23 @@ public class SubspaceConnection {
     private static EventLoopGroup eventLoopGroup = new MultiThreadIoEventLoopGroup(1, new DefaultThreadFactory("Channel-Server-Subspace", true), NioIoHandler.newFactory());
     private static volatile Channel channel;
     private static volatile boolean activelyDisconnect;
+    private static volatile @Nullable MinecraftServer server;
+
+    /**
+     * 连接子空间服务器并记录当前服务端实例，供无上下文场景（如 UDP 编码时）取用。
+     */
+    public static void connect(MinecraftServer minecraftServer) {
+        server = minecraftServer;
+        connect();
+    }
+
+    public static @Nullable MinecraftServer getServer() {
+        return server;
+    }
+
+    public static void clearServer() {
+        server = null;
+    }
 
     /**
      * <pre>
@@ -75,18 +93,18 @@ public class SubspaceConnection {
                                 activelyDisconnect = false;
                             } else {
                                 LogUtils.getLogger().warn("Disconnected from subspace. Reconnecting in 30s...");
-                                eventLoopGroup.schedule(SubspaceConnection::connect, 30, TimeUnit.SECONDS);
+                                eventLoopGroup.schedule((Runnable) SubspaceConnection::connect, 30, TimeUnit.SECONDS);
                             }
                             channel = null;
                         });
                         send(new InitPacket());
                         LogUtils.getLogger().info("Subspace connected. Sending InitPacket...");
-                        if (ServerLifecycleHooks.getCurrentServer() != null) {
-                            ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers().forEach(SubspaceConnection::newPlayer);
+                        if (server != null) {
+                            server.getPlayerList().getPlayers().forEach(SubspaceConnection::newPlayer);
                         }
                     } else {
                         LogUtils.getLogger().error("Failed to connect to subspace server. Try again in 30s...");
-                        eventLoopGroup.schedule(SubspaceConnection::connect, 30, TimeUnit.SECONDS);
+                        eventLoopGroup.schedule((Runnable) SubspaceConnection::connect, 30, TimeUnit.SECONDS);
                         channel = null;
                     }
                 });
@@ -127,7 +145,7 @@ public class SubspaceConnection {
         SubspaceConnection.send(new PlayerLoginPacket(token, player.getUUID(), player.getId()));
         SubspaceConnection.send(new DataUpdatePacket());
         var cfg = ChannelServerConfig.get();
-        eventLoopGroup.schedule(() -> PacketDistributor.sendToPlayer((ServerPlayer) player, new SubspaceInitPacket(token, cfg.subspaceProtocol, cfg.subspaceAddress, cfg.subspaceClientPort, cfg.subspaceSecurityLevel)), 3, TimeUnit.SECONDS);
+        eventLoopGroup.schedule(() -> ServerPlayNetworking.send((ServerPlayer) player, new SubspaceInitPacket(token, cfg.subspaceProtocol, cfg.subspaceAddress, cfg.subspaceClientPort, cfg.subspaceSecurityLevel)), 3, TimeUnit.SECONDS);
     }
 
     public static boolean using() {

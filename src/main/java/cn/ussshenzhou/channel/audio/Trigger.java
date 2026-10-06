@@ -23,7 +23,7 @@ public enum Trigger implements ITranslatable {
     @Override
     public String translateKey() {
         if (this == PUSH_TO_TALK || this == SWITCH) {
-            return Language.getInstance().getOrDefault(translateKey).replace("%1$s", ModKeyMappingRegistry.PTT.getKey().getDisplayName().getString());
+            return Language.getInstance().getOrDefault(translateKey).replace("%1$s", ModKeyMappingRegistry.PTT.getTranslatedKeyMessage().getString());
         }
         return translateKey;
     }

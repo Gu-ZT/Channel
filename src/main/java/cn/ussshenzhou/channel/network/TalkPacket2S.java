@@ -9,7 +9,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * @author USS_Shenzhou
@@ -48,7 +47,7 @@ public class TalkPacket2S extends SubspacePacket implements CustomPacketPayload 
         throw new UnsupportedOperationException();
     }
 
-    public void serverHandler(IPayloadContext context) {
-        RelayHandler.process((ServerPlayer) context.player(), opus);
+    public void serverHandler(ServerPlayer player) {
+        RelayHandler.process(player, opus);
     }
 }

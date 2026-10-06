@@ -56,6 +56,9 @@ dependencies {
 
     implementation 'io.github.jaredmdobson:concentus:1.0.2'
     include 'io.github.jaredmdobson:concentus:1.0.2'
+
+    // javax.annotation（Nullable / ParametersAreNonnullByDefault）注解，仅编译期需要
+    compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
 }
 
 // 展开 fabric.mod.json 中的 ${} 属性占位符

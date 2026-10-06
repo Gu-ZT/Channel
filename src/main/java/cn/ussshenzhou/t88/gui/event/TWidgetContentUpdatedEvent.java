@@ -1,12 +1,19 @@
 package cn.ussshenzhou.t88.gui.event;
 
 import cn.ussshenzhou.t88.gui.widegt.TWidget;
-import net.neoforged.bus.api.Event;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.EventFactory;
 
 /**
  * @author Tony Yu
  */
-public class TWidgetContentUpdatedEvent extends Event {
+public class TWidgetContentUpdatedEvent {
+    public static final Event<Listener> EVENT = EventFactory.createArrayBacked(Listener.class, listeners -> event -> {
+        for (Listener listener : listeners) {
+            listener.onContentUpdated(event);
+        }
+    });
+
     private final TWidget updated;
 
     public TWidgetContentUpdatedEvent(TWidget updated) {
@@ -15,5 +22,9 @@ public class TWidgetContentUpdatedEvent extends Event {
 
     public TWidget getUpdated() {
         return updated;
+    }
+
+    public interface Listener {
+        void onContentUpdated(TWidgetContentUpdatedEvent event);
     }
 }

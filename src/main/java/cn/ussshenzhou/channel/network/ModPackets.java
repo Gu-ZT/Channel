@@ -1,37 +1,34 @@
 package cn.ussshenzhou.channel.network;
 
-import cn.ussshenzhou.channel.util.ModConstant;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 /**
  * 模组网络包注册，双向注册以保持与旧版本客户端互通。
  */
-@EventBusSubscriber
 public class ModPackets {
 
-    @SubscribeEvent
-    public static void register(RegisterPayloadHandlersEvent event) {
-        PayloadRegistrar registrar = event.registrar(ModConstant.SHORT_ID);
-        registrar.playBidirectional(TalkPacket2S.TYPE, TalkPacket2S.CODEC,
-                (packet, context) -> packet.serverHandler(context), (packet, context) -> {
-                });
-        registrar.playBidirectional(AudioPacket2C.TYPE, AudioPacket2C.CODEC,
-                (packet, context) -> {
-                }, (packet, context) -> packet.clientHandler(context));
-        registrar.playBidirectional(OpMutePacket.TYPE, OpMutePacket.CODEC,
-                (packet, context) -> {
-                }, (packet, context) -> packet.clientHandler(context));
-        registrar.playBidirectional(SetBlockChannelPacket.TYPE, SetBlockChannelPacket.CODEC,
-                (packet, context) -> packet.serverHandler(context), (packet, context) -> {
-                });
-        registrar.playBidirectional(SetItemChannelPacket.TYPE, SetItemChannelPacket.CODEC,
-                (packet, context) -> packet.serverHandler(context), (packet, context) -> {
-                });
-        registrar.playBidirectional(SubspaceInitPacket.TYPE, SubspaceInitPacket.CODEC,
-                (packet, context) -> {
-                }, (packet, context) -> packet.clientHandler(context));
+    public static void register() {
+        registerBidirectional(TalkPacket2S.TYPE, TalkPacket2S.CODEC);
+        registerBidirectional(AudioPacket2C.TYPE, AudioPacket2C.CODEC);
+        registerBidirectional(OpMutePacket.TYPE, OpMutePacket.CODEC);
+        registerBidirectional(SetBlockChannelPacket.TYPE, SetBlockChannelPacket.CODEC);
+        registerBidirectional(SetItemChannelPacket.TYPE, SetItemChannelPacket.CODEC);
+        registerBidirectional(SubspaceInitPacket.TYPE, SubspaceInitPacket.CODEC);
+
+        ServerPlayNetworking.registerGlobalReceiver(TalkPacket2S.TYPE, (packet, context) ->
+                context.server().execute(() -> packet.serverHandler(context.player())));
+        ServerPlayNetworking.registerGlobalReceiver(SetBlockChannelPacket.TYPE, (packet, context) ->
+                context.server().execute(() -> packet.serverHandler(context.player())));
+        ServerPlayNetworking.registerGlobalReceiver(SetItemChannelPacket.TYPE, (packet, context) ->
+                context.server().execute(() -> packet.serverHandler(context.player())));
+    }
+
+    private static <T extends CustomPacketPayload> void registerBidirectional(CustomPacketPayload.Type<T> type, StreamCodec<FriendlyByteBuf, T> codec) {
+        PayloadTypeRegistry.serverboundPlay().register(type, codec);
+        PayloadTypeRegistry.clientboundPlay().register(type, codec);
     }
 }
