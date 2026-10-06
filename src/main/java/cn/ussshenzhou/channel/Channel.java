@@ -7,6 +7,7 @@ import cn.ussshenzhou.channel.config.ChannelClientConfig;
 import cn.ussshenzhou.channel.config.ChannelPlayerConfig;
 import cn.ussshenzhou.channel.config.ChannelServerConfig;
 import cn.ussshenzhou.t88.config.ConfigHelper;
+import cn.ussshenzhou.t88.util.T88Config;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -26,6 +27,7 @@ public class Channel {
         if (FMLEnvironment.getDist() == Dist.CLIENT) {
             ConfigHelper.loadConfig(new ChannelClientConfig());
             ConfigHelper.loadConfig(new ChannelPlayerConfig());
+            ConfigHelper.loadConfig(new T88Config());
         }
         ConfigHelper.loadConfig(new ChannelServerConfig());
 

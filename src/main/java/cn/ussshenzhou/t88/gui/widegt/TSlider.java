@@ -1,0 +1,323 @@
+package cn.ussshenzhou.t88.gui.widegt;
+
+import cn.ussshenzhou.t88.gui.screen.TScreen;
+import cn.ussshenzhou.t88.gui.util.MouseHelper;
+import cn.ussshenzhou.t88.gui.util.VanillaWidget2TComponentHelper;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import org.joml.Vector2i;
+import com.mojang.serialization.Codec;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.OptionInstance;
+import net.minecraft.client.Options;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
+
+import javax.annotation.Nullable;
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+
+/**
+ * @author USS_Shenzhou
+ */
+public class TSlider extends OptionInstance.OptionInstanceSliderButton<Double> implements TWidget, TResponder<Double> {
+    protected boolean visible = true;
+    TComponent parent = null;
+    TScreen parentScreen = null;
+    double min, max;
+    protected final LinkedList<Consumer<Double>> responders = new LinkedList<>();
+
+    @Deprecated
+    public TSlider(double minValue, double maxValue, float pSteps, Component tipText) {
+        this(tipText.getString(), minValue, maxValue, false, null, true);
+    }
+
+    public TSlider(String title, double minValue, double maxValue) {
+        this(title, minValue, maxValue, true, null, true);
+    }
+
+    public TSlider(String title, double minValue, double maxValue, boolean showValueInTitle, @Nullable Component tipText, boolean applyValueImmediately) {
+        super(Minecraft.getInstance().options, 0, 0, 0, 0,
+                new OptionInstance<>(title,
+                        value -> null,
+                        (pCaption, value) -> showValueInTitle ?
+                                Options.genericValueLabel(pCaption, Component.literal(String.format("%.2f", value))) :
+                                Component.literal(title),
+                        new DoubleRange(minValue, maxValue),
+                        maxValue,
+                        d -> {
+                        }
+                ),
+                new DoubleRange(minValue, maxValue),
+                value -> tipText == null ? null : Tooltip.create(tipText),
+                d -> {
+                },
+                applyValueImmediately
+        );
+        //AccessorProxy.SliderProxy.setOption(this, progressOption);
+        this.updateMessage();
+        this.min = minValue;
+        this.max = maxValue;
+    }
+
+    public TSlider(String title, double minValue, double maxValue, BiFunction<Component, Double, Component> textFromCaptionAndValue, @Nullable Component tipText, boolean applyValueImmediately) {
+        super(Minecraft.getInstance().options, 0, 0, 0, 0,
+                new OptionInstance<>(title,
+                        value -> null,
+                        textFromCaptionAndValue::apply,
+                        new DoubleRange(minValue, maxValue),
+                        maxValue,
+                        d -> {
+                        }
+                ),
+                new DoubleRange(minValue, maxValue),
+                value -> tipText == null ? null : Tooltip.create(tipText),
+                d -> {
+                },
+                applyValueImmediately
+        );
+        //AccessorProxy.SliderProxy.setOption(this, progressOption);
+        this.updateMessage();
+        this.min = minValue;
+        this.max = maxValue;
+    }
+
+    public double relToAbsValueLinear(double relativeValue) {
+        return relativeValue * (max - min) + min;
+    }
+
+    public double absToRelValueLinear(double absoluteValue) {
+        return (absoluteValue - min) / (max - min);
+    }
+
+    @Deprecated
+    @Override
+    public void setValue(double value) {
+        super.setValue(value);
+    }
+
+    public void setRelValue(double relativeValue) {
+        this.value = Mth.clamp(relativeValue, 0, 1);
+        applyValue();
+    }
+
+    public void setAbsValue(double absoluteValue) {
+        this.value = absToRelValueLinear(absoluteValue);
+        applyValue();
+    }
+
+    @Deprecated
+    public void setValueWithoutRespond(double value) {
+        this.value = Mth.clamp(value, min, max);
+        applyValue(false);
+    }
+
+    public void setRelValueWithoutRespond(double relativeValue) {
+        this.value = Mth.clamp(relativeValue, 0, 1);
+        applyValue(false);
+    }
+
+    public void setAbsValueWithoutRespond(double absoluteValue) {
+        this.value = absToRelValueLinear(absoluteValue);
+        applyValue(false);
+    }
+
+    @Deprecated
+    public double getValue() {
+        return value;
+    }
+
+    public double getRelValue() {
+        return value;
+    }
+
+    public double getAbsValue() {
+        return relToAbsValueLinear(value);
+    }
+
+    @Override
+    protected void applyValue() {
+        applyValue(true);
+    }
+
+    protected void applyValue(boolean respond) {
+        if (respond) {
+            respond(value);
+        }
+        super.applyValue();
+        super.updateMessage();
+    }
+
+    @Deprecated
+    public void addValue(double delta) {
+        setValue(value + delta);
+    }
+
+    protected float factor0 = 0.2f;
+    protected float factor1 = 0.1f;
+    protected float factor2 = 0.05f;
+    protected float factor3 = 0.01f;
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double deltaX, double deltaY) {
+        if (isInRange(mouseX, mouseY, 2, 2)) {
+            if (Minecraft.getInstance().hasControlDown()) {
+                if (Minecraft.getInstance().hasShiftDown()) {
+                    //TODO
+                }
+
+            } else if (Minecraft.getInstance().hasShiftDown()) {
+
+            } else {
+
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
+        if (isInRange(event, 2, 2)) {
+            return super.mouseDragged(event, dx, dy);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean keyPressed(KeyEvent event) {
+        if (isInRange(MouseHelper.getMouseX(), MouseHelper.getMouseY(), 2, 2)) {
+            return super.keyPressed(event);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isVisibleT() {
+        return visible;
+    }
+
+    @Override
+    public void setVisibleT(boolean visible) {
+        this.visible = visible;
+    }
+
+    @Override
+    public void setBounds(int x, int y, int width, int height) {
+        VanillaWidget2TComponentHelper.setBounds(x, y, width, height, this);
+    }
+
+    @Override
+    public void setAbsBounds(int x, int y, int width, int height) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+    }
+
+    @Override
+    public void setParent(TComponent parent) {
+        this.parent = parent;
+    }
+
+    @Nullable
+    @Override
+    public TComponent getParent() {
+        return parent;
+    }
+
+    @Override
+    public void setParentScreen(@Nullable TScreen parentScreen) {
+        this.parentScreen = parentScreen;
+    }
+
+    @Nullable
+    @Override
+    public TScreen getParentScreen() {
+        return parentScreen;
+    }
+
+    @Override
+    public int getXT() {
+        return x;
+    }
+
+    @Override
+    public int getYT() {
+        return y;
+    }
+
+    @Override
+    public Vector2i getPreferredSize() {
+        return new Vector2i(width, 20);
+    }
+
+    @Override
+    public Vector2i getSize() {
+        return new Vector2i(width, height);
+    }
+
+    @Override
+    public void tickT() {
+    }
+
+    @Override
+    public void layout() {
+
+    }
+
+    @Override
+    public void respond(Double value) {
+        responders.forEach(consumer -> consumer.accept(value));
+    }
+
+    @Override
+    public void addResponder(Consumer<Double> responder) {
+        responders.add(responder);
+    }
+
+    @Override
+    public void clearResponders() {
+        responders.clear();
+    }
+
+    @Override
+    public void onRelease(MouseButtonEvent event) {
+        if (isInRange(event)) {
+            super.onRelease(event);
+        }
+    }
+
+    private static class DoubleRange implements OptionInstance.SliderableValueSet<Double> {
+        double minInclusive;
+        double maxInclusive;
+
+        public DoubleRange(double minInclusive, double maxInclusive) {
+            this.minInclusive = minInclusive;
+            this.maxInclusive = maxInclusive;
+        }
+
+        @Override
+        public double toSliderValue(Double value) {
+            return Mth.map(value, minInclusive, maxInclusive, 0, 1);
+        }
+
+        @Override
+        public Double fromSliderValue(double percentage) {
+            return Mth.map(percentage, 0, 1, minInclusive, maxInclusive);
+        }
+
+        @Override
+        public Optional<Double> validateValue(Double value) {
+            return value >= minInclusive && value <= maxInclusive ? Optional.of(value) : Optional.empty();
+        }
+
+        @Override
+        public Codec<Double> codec() {
+            return Codec.DOUBLE;
+        }
+    }
+}
